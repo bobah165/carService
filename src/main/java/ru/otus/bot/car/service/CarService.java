@@ -1,13 +1,11 @@
 package ru.otus.bot.car.service;
 
-import java.time.LocalDate;
 import java.util.List;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import ru.otus.bot.car.data.MetricType;
-import ru.otus.bot.car.data.Metrics;
+import ru.otus.bot.car.integration.producer.CarPublisherService;
 import ru.otus.bot.car.repository.CarRepository;
 import ru.otus.bot.car.repository.model.Car;
 
@@ -17,17 +15,18 @@ import ru.otus.bot.car.repository.model.Car;
 public class CarService {
 
     private final CarRepository carRepository;
-    private final MetricsService metricsService;
+    private final CarPublisherService carPublisherService;
+
 
     @Transactional
     public void save(Car car) {
-        setInitialMileage(car);
         car.setId(UUID.randomUUID().toString());
-        carRepository.save(car);
+        var savedCar = carRepository.save(car);
+        carPublisherService.sendOrder(savedCar);
     }
 
     @Transactional(readOnly = true)
-    public Car findById(Long id) {
+    public Car findById(String id) {
         return carRepository.findByChatId(String.valueOf(id))
                             .orElse(new Car().setId("no car"));
     }
@@ -43,10 +42,4 @@ public class CarService {
         return carRepository.findByMileageBetween(from, to);
     }
 
-    private void setInitialMileage(Car car) {
-        metricsService.save(new Metrics().setMetricType(MetricType.MILEAGE)
-                                         .setDate(LocalDate.now())
-                                         .setValue(String.valueOf(car.getMileage()))
-                                         .setUserId(car.getId()));
-    }
 }
