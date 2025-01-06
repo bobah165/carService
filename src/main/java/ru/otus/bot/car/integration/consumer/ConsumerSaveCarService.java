@@ -20,9 +20,9 @@ public class ConsumerSaveCarService {
 
   @Transactional
   @KafkaListener(topics = topicTelegram, groupId = kafkaConsumerGroupId, properties = {"spring.json.value.default.type=ru.otus.bot.car.repository.model.Car"})
-  public Car createOrder(Car metrics) {
-    log.info("Message consumed {}", metrics);
-    carService.save(metrics);
-    return metrics;
+  public Car createOrder(Car car) {
+    log.info("Message consumed {}", car);
+    carService.save(car);
+    return car;
   }
 }
