@@ -29,7 +29,7 @@ ingress:
   enabled: false
   name: "car-service-helm-ingress"
   className: nginx
-  host: "arch.homework"
+  host: "arch.homework.car"
   pathType: Prefix
   path: /
 
